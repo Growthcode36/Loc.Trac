@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bagikan Lokasi</title>
+</head>
+<body>
+    <h2>Bagikan Lokasi Anda</h2>
+    <input type="text" id="userId" placeholder="Masukkan ID Anda" />
+    <button id="share-location">Bagikan Lokasi</button>
+    <p id="status"></p>
+
+    <script>
+        document.getElementById("share-location").addEventListener("click", function () {
+            const userId = document.getElementById("userId").value;
+            if (!userId) {
+                alert("Masukkan ID Anda!");
+                return;
+            }
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const latitude = position.coords.latitude;
+                        const longitude = position.coords.longitude;
+                        document.getElementById("status").innerText = `Lokasi Anda: ${latitude}, ${longitude}`;
+                        
+                        fetch("http://localhost:3000/save-location", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({ userId, latitude, longitude }),
+                        })
+                        .then(response => response.json())
+                        .then(data => console.log(data))
+                        .catch(error => console.error("Error:", error));
+                    },
+                    (error) => {
+                        document.getElementById("status").innerText = "Gagal mendapatkan lokasi: " + error.message;
+                    }
+                );
+            } else {
+                document.getElementById("status").innerText = "Geolocation tidak didukung di browser ini.";
+            }
+        });
+    </script>
+</body>
+</html>
